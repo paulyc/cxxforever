@@ -1,3 +1,4 @@
 build
 xcodebuild
 .DS_Store
+.d.*

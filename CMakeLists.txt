@@ -23,6 +23,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(c++forever)
 
+#file(GLOB src_files src/*.cpp)
+#file(GLOB hdr_files src/*.hpp)
+
 add_library(twilio++
 
 	SHARED 
@@ -39,6 +42,8 @@ add_library(twilio++
 	src/server.cpp
 )
 
+target_include_directories(twilio++ PRIVATE src)
+
 add_executable(c++forever
 	src/main.cpp
 )
@@ -46,3 +51,5 @@ add_executable(c++forever
 target_link_libraries(c++forever 
 	twilio++
 )
+
+target_include_directories(c++forever PUBLIC src)
