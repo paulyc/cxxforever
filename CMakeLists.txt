@@ -23,12 +23,22 @@ cmake_minimum_required(VERSION 3.10)
 
 project(c++forever)
 
-#file(GLOB src_files src/*.cpp)
-#file(GLOB hdr_files src/*.hpp)
+include(GNUInstallDirs)
+
+file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+
+file(GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp)
+file(GLOB_RECURSE TEST_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/test/*.hpp)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /usr/local)
 
 add_library(twilio++
-
-	SHARED 
+	SHARED
 
 	src/libmain.cpp
 	src/client.cpp
@@ -40,16 +50,36 @@ add_library(twilio++
 	src/sipserver.cpp
 	src/httpclient.cpp
 	src/server.cpp
-)
+	src/plexer.cpp
+    src/message.cpp
 
+	${HEADER_FILES}
+)
 target_include_directories(twilio++ PRIVATE src)
 
-add_executable(c++forever
-	src/main.cpp
-)
-
-target_link_libraries(c++forever 
-	twilio++
-)
-
+add_executable(c++forever src/main.cpp)
+target_link_libraries(c++forever twilio++)
 target_include_directories(c++forever PUBLIC src)
+
+#find_package(CPPUNIT REQUIRED)
+#include_directories(${CPPUNIT_INCLUDE_DIR})
+#target_link_libraries(test ${PNG_LIBRARY})
+
+add_executable(test++forever
+	${TEST_SOURCES}
+	${TEST_HEADERS}
+)
+add_library(cppunit SHARED IMPORTED)
+set_target_properties(cppunit PROPERTIES 
+	INTERFACE_INCLUDE_DIRECTORIES $<INSTALL_INTERFACE:include>
+)
+target_include_directories(test++forever PUBLIC $<INSTALL_INTERFACE:include>)
+target_link_libraries(test++forever cppunit twilio++)
+
+#find_package(CxxTest)
+#if(CXXTEST_FOUND)
+#	include_directories(${CXXTEST_INCLUDE_DIR})
+#	enable_testing()
+#	CXXTEST_ADD_TEST(unittest_twilio++ test/kevent_test.cpp ${CMAKE_HOME_DIRECTORY}/test/kevent_test.hpp)
+#	target_link_libraries(unittest_twilio++ twilio++)
+#endif()

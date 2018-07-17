@@ -19,21 +19,17 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef _IO_GITHUB_PAULYC_TWILIO___LIBTWILIO___HPP_
-#define _IO_GITHUB_PAULYC_TWILIO___LIBTWILIO___HPP_
-
-#include <string>
+#ifndef _IO_GITHUB_PAULYC_TWILIO___MESSAGE___HPP_
+#define _IO_GITHUB_PAULYC_TWILIO___MESSAGE___HPP_
 
 namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
-
-    typedef std::basic_string<uint8_t> BinaryString;
     
-class TwilioPP {
-public:
-    TwilioPP() {}
-    virtual ~TwilioPP() {}
-};
-
+    class Message {
+        
+    };
+    
 }}}}
 
 #endif
+
+

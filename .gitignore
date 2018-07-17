@@ -2,3 +2,5 @@ build
 xcodebuild
 .DS_Store
 .d.*
+twilio++
+c++forever.xcworkspace
