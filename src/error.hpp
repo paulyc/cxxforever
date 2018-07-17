@@ -19,11 +19,11 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "libtwilio++.hpp"
+#ifndef _IO_GITHUB_PAULYC_TWILIO___ERROR___HPP_
+#define _IO_GITHUB_PAULYC_TWILIO___ERROR___HPP_
 
-using namespace io::github::paulyc::twilioplusplus;
+namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
 
-int main(int argc, char *argv[]) {
-    TwilioPP t;
-    return 0;
-}
+}}}}
+
+#endif

@@ -19,11 +19,14 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "libtwilio++.hpp"
+#include <gtest/gtest.h>
 
-using namespace io::github::paulyc::twilioplusplus;
+namespace {
 
-int main(int argc, char *argv[]) {
-    TwilioPP t;
-    return 0;
+TEST(GtestTest, Axiom) {
+  EXPECT_EQ(1, -1*-1);
+  EXPECT_EQ(0, 1*0);
+  EXPECT_GT(1, 0);
+}
+
 }

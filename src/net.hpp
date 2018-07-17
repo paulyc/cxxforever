@@ -28,9 +28,12 @@
 #include <memory>
 #include <thread>
 #include <atomic>
-#include <cassert>
+#include <string>
 #include <functional>
 #include <algorithm>
+
+#include <cassert>
+#include <cerrno>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -55,6 +58,14 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
     const static int MAX_SOCKETS = 1024;
     const static int MAX_EVENTS = 1024;
     
+    class errno_exception : public std::exception {
+    public:
+        errno_exception() : _errno(errno), _str(strerror(errno)) {}
+        int _errno;
+        std::string _str;
+    };
+    class sockinit_exception : public errno_exception {};
+    
     template <typename Client_T>
     class NetworkEngine : public NetworkEngineConfig {
     public:
@@ -63,23 +74,26 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
         
         void run() {
             _runThread = std::unique_ptr<std::thread>(new std::thread([this]() {
-                initServerListen();
-                
+                doServerListen();
                 serverMainLoop();
                 //close kq
             }));
             
        }
         
-        void initServerListen() {
-            std::unique_lock<std::mutex>(_mutex);
-            
+        void cleanup() {
+            close(_listenSock4);
+            _listenSock4 = -1;
+        }
+        
+        void initServerSock() throw(sockinit_exception) {
             // initialize server socket
             _listenSock4 = socket(AF_INET, SOCK_STREAM, PF_INET);
             if (_listenSock4 == -1) {
-                //error
+                cleanup();
+                throw sockinit_exception();
             }
-            //_sockets.push_back(_listenSock4);
+            
             const sockaddr_in addr = {
                 AF_INET,
                 AF_INET,
@@ -88,13 +102,20 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
             };
             int res = bind(_listenSock4, (const sockaddr *)&addr, sizeof(sockaddr_in));
             if (res != 0) {
-                
+                cleanup();
+                throw sockinit_exception();
             }
             
             res = listen(_listenSock4, 100);
             if (res != 0) {
                 
             }
+        }
+        
+        void doServerListen() {
+            std::unique_lock<std::mutex>(_mutex);
+            
+            initServerSock();
             
             _kq = kqueue();
             if (_kq == -1) {
@@ -113,7 +134,7 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
              time limit    expires, then kevent() returns 0.*/
             
             std::array<struct kevent, MAX_EVENTS> eventsPending;
-            res = kevent(_kq, _eventsRegistered.data(), 1, eventsPending.data(), eventsPending.size(), NULL);
+            int res = kevent(_kq, _eventsRegistered.data(), 1, eventsPending.data(), eventsPending.size(), NULL);
             if (res > 0) {
                 assert(res == 1);
                 if (eventsPending[0].flags & EV_ERROR) {

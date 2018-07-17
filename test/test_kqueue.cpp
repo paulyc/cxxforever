@@ -19,11 +19,44 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include <cppunit/TestCase.h>
-#include <cppunit/TestSuite.h>
-#include <cppunit/TestCaller.h>
-#include <cppunit/TestRunner.h>
+#include <gtest/gtest.h>
 
-class TestKqueue : public CppUnit::TestCase {
+#include "../src/net.hpp"
+
+#include <cerrno>
+
+namespace {
     
-};
+    using namespace io::github::paulyc::twilioplusplus;
+    
+    int sock;
+    int kq;
+    
+    TEST(SocketTest, socketSuccess) {
+        sock = socket(PF_INET, SOCK_STREAM, 0);
+        EXPECT_NE(sock, -1);
+    }
+    
+    TEST(SocketTest, socketFail) {
+        sock = socket(99999, SOCK_STREAM, PF_INET);
+        
+        EXPECT_EQ(sock, -1);
+        EXPECT_EQ(errno, EAFNOSUPPORT);
+    }
+    
+    TEST(SocketTest, bindSuccess) {
+        const sockaddr_in addr = {
+            AF_INET,
+            AF_INET,
+            htons(8888),
+            { inet_addr("0.0.0.0") }
+        };
+        sock = socket(PF_INET, SOCK_STREAM, 0);
+        int res = bind(sock, (const sockaddr *)&addr, sizeof(sockaddr_in));
+        EXPECT_EQ(res, 0);
+    }
+    
+    TEST(KqueueTest, kqueue) {
+        
+    }
+}

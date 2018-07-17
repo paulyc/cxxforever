@@ -51,7 +51,8 @@ add_library(twilio++
 	src/httpclient.cpp
 	src/server.cpp
 	src/plexer.cpp
-    src/message.cpp
+	src/message.cpp
+	src/error.cpp
 
 	${HEADER_FILES}
 )
@@ -61,25 +62,17 @@ add_executable(c++forever src/main.cpp)
 target_link_libraries(c++forever twilio++)
 target_include_directories(c++forever PUBLIC src)
 
-#find_package(CPPUNIT REQUIRED)
-#include_directories(${CPPUNIT_INCLUDE_DIR})
-#target_link_libraries(test ${PNG_LIBRARY})
-
 add_executable(test++forever
 	${TEST_SOURCES}
 	${TEST_HEADERS}
 )
-add_library(cppunit SHARED IMPORTED)
-set_target_properties(cppunit PROPERTIES 
-	INTERFACE_INCLUDE_DIRECTORIES $<INSTALL_INTERFACE:include>
-)
-target_include_directories(test++forever PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(test++forever cppunit twilio++)
-
-#find_package(CxxTest)
-#if(CXXTEST_FOUND)
-#	include_directories(${CXXTEST_INCLUDE_DIR})
-#	enable_testing()
-#	CXXTEST_ADD_TEST(unittest_twilio++ test/kevent_test.cpp ${CMAKE_HOME_DIRECTORY}/test/kevent_test.hpp)
-#	target_link_libraries(unittest_twilio++ twilio++)
-#endif()
+add_library(gtest STATIC IMPORTED)
+find_library(GTEST_LIB gtest)
+add_library(gtest_main STATIC IMPORTED)
+find_library(GTEST_MAIN_LIB gtest_main)
+add_library(gmock STATIC IMPORTED)
+find_library(GMOCK_LIB gmock)
+add_library(gmock_main STATIC IMPORTED)
+find_library(GMOCK_MAIN_LIB gmock_main)
+target_include_directories(test++forever PUBLIC /usr/local/include)
+target_link_libraries(test++forever ${GTEST_LIB} ${GTEST_MAIN_LIB} twilio++)
