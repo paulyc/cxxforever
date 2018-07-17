@@ -28,12 +28,10 @@
 #include <memory>
 #include <thread>
 #include <atomic>
-#include <string>
 #include <functional>
 #include <algorithm>
 
 #include <cassert>
-#include <cerrno>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -43,6 +41,7 @@
 #include <arpa/inet.h>
 
 #include "client.hpp"
+#include "error.hpp"
 
 namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
     
@@ -58,12 +57,6 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
     const static int MAX_SOCKETS = 1024;
     const static int MAX_EVENTS = 1024;
     
-    class errno_exception : public std::exception {
-    public:
-        errno_exception() : _errno(errno), _str(strerror(errno)) {}
-        int _errno;
-        std::string _str;
-    };
     class sockinit_exception : public errno_exception {};
     
     template <typename Client_T>
@@ -82,16 +75,18 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
        }
         
         void cleanup() {
-            close(_listenSock4);
-            _listenSock4 = -1;
+            if (_listenSock4 != -1) {
+                close(_listenSock4);
+                _listenSock4 = -1;
+            }
         }
         
-        void initServerSock() throw(sockinit_exception) {
+        void initServerSock() throw(general_exception) {
             // initialize server socket
             _listenSock4 = socket(AF_INET, SOCK_STREAM, PF_INET);
             if (_listenSock4 == -1) {
                 cleanup();
-                throw sockinit_exception();
+                throw general_exception(STRINGIFY_FILELINE());
             }
             
             const sockaddr_in addr = {
@@ -103,12 +98,13 @@ namespace io { namespace github { namespace paulyc { namespace twilioplusplus {
             int res = bind(_listenSock4, (const sockaddr *)&addr, sizeof(sockaddr_in));
             if (res != 0) {
                 cleanup();
-                throw sockinit_exception();
+                throw general_exception(STRINGIFY_FILELINE());
             }
             
             res = listen(_listenSock4, 100);
             if (res != 0) {
-                
+                cleanup();
+                throw general_exception(STRINGIFY_FILELINE());
             }
         }
         
